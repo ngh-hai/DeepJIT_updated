@@ -27,28 +27,30 @@ def train_model(data, params):
     model = DeepJIT(args=params)
     if torch.cuda.is_available():
         model = model.cuda()
-    optimizer = torch.optim.Adam(model.parameters(), lr=params.l2_reg_lambda)
+    optimizer = torch.optim.Adam(model.parameters(), lr=params.l2_reg_lambda) # using Adam optimizer with L2 regularization
 
-    criterion = nn.BCELoss()
+    criterion = nn.BCELoss() # using Binary Cross Entropy Loss
     for epoch in range(1, params.num_epochs + 1):
         total_loss = 0
         # building batches for training model
         batches = mini_batches_train(X_msg=data_pad_msg, X_code=data_pad_code, Y=data_labels)
         for i, (batch) in enumerate(tqdm(batches)):
             pad_msg, pad_code, labels = batch
-            if torch.cuda.is_available():                
+            if torch.cuda.is_available():                 # if GPU available
                 pad_msg, pad_code, labels = torch.tensor(pad_msg).cuda(), torch.tensor(
-                    pad_code).cuda(), torch.cuda.FloatTensor(labels)
+                    pad_code).cuda(), torch.cuda.FloatTensor(labels) # convert to tensor
+
+
             else:            
                 pad_msg, pad_code, labels = torch.tensor(pad_msg).long(), torch.tensor(pad_code).long(), torch.tensor(
                     labels).float()
 
-            optimizer.zero_grad()
-            predict = model.forward(pad_msg, pad_code)
-            loss = criterion(predict, labels)
-            total_loss += loss
-            loss.backward()
-            optimizer.step()
+            optimizer.zero_grad() # zero the gradients to avoid accumulation
+            predict = model.forward(pad_msg, pad_code) #
+            loss = criterion(predict, labels) # calculate the loss using BCE
+            total_loss += loss # accumulate the loss
+            loss.backward() # backpropagation
+            optimizer.step() # update the weights
 
         print('Epoch %i / %i -- Total loss: %f' % (epoch, params.num_epochs, total_loss))    
         save(model, params.save_dir, 'epoch', epoch)

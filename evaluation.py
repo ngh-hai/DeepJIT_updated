@@ -22,7 +22,7 @@ def evaluation_model(data, params):
     model = DeepJIT(args=params)
     if torch.cuda.is_available():
         model = model.cuda()
-    model.load_state_dict(torch.load(params.load_model))
+    model.load_state_dict(torch.load(params.load_model, map_location=torch.device('cpu')))
 
     model.eval()  # eval mode (batchnorm uses moving mean/variance instead of mini-batch mean/variance)
     with torch.no_grad():

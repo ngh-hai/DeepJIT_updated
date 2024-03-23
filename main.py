@@ -40,11 +40,12 @@ def read_args():
     # CUDA
     parser.add_argument('-device', type=int, default=-1,
                         help='device to use for iterate data, -1 mean cpu [default: -1]')
-    parser.add_argument('-no-cuda', action='store_true', default=False, help='disable the GPU')
+    parser.add_argument('-no-cuda', action='store_true', default=True, help='disable the GPU')
     return parser
 
 if __name__ == '__main__':
     params = read_args().parse_args()
+    print(params)
     
     if params.train is True:
         data = pickle.load(open(params.train_data, 'rb'))
